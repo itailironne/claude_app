@@ -1,5 +1,14 @@
 import { useState } from 'react'
+import emailjs from '@emailjs/browser'
 import './App.css'
+
+// ── EmailJS config ─────────────────────────────────────────────
+// Sign up free at https://www.emailjs.com, connect your email,
+// create a template, then paste your IDs here.
+const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY'   // Account > API Keys
+const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID'   // Email Services
+const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID'  // Email Templates
+// ──────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
   { id: 'produce',   label: 'Produce',       emoji: '🥦' },
@@ -128,6 +137,8 @@ export default function App() {
   const [category, setCategory] = useState('produce')
   const [bulkMode, setBulkMode] = useState(false)
   const [bulkText, setBulkText] = useState('')
+  const [wifeEmail, setWifeEmail]   = useState('')
+  const [emailStatus, setEmailStatus] = useState(null) // null | 'sending' | 'sent' | 'error'
 
   // ── Edit mode actions ──────────────────────────────────────────
   const addProduct = () => {
@@ -175,6 +186,53 @@ export default function App() {
   const inBag     = products.filter(p => p.status === 'in_bag').length
   const notFound  = products.filter(p => p.status === 'not_found').length
   const pending   = total - inBag - notFound
+
+  const sendReport = async () => {
+    if (!wifeEmail.trim()) { alert('Please enter your wife\'s email address.'); return }
+    if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') { alert('Please configure your EmailJS credentials in App.jsx first.'); return }
+
+    const date    = new Date().toLocaleString()
+    const inBagList    = products.filter(p => p.status === 'in_bag')
+    const notFoundList = products.filter(p => p.status === 'not_found')
+    const pendingList  = products.filter(p => p.status === 'pending')
+
+    const lines = [
+      `🛒 Grocery Shopping Report`,
+      `Date: ${date}`,
+      ``,
+      `Summary:`,
+      `✅ Found: ${inBagList.length} item${inBagList.length !== 1 ? 's' : ''}`,
+      `❌ Not found: ${notFoundList.length} item${notFoundList.length !== 1 ? 's' : ''}`,
+      `⏳ Not checked: ${pendingList.length} item${pendingList.length !== 1 ? 's' : ''}`,
+    ]
+
+    if (inBagList.length > 0) {
+      lines.push(``, `✅ IN BAG:`)
+      inBagList.forEach(p => lines.push(`  • ${p.name} (${getCategoryMeta(p.category).label})`))
+    }
+    if (notFoundList.length > 0) {
+      lines.push(``, `❌ NOT FOUND:`)
+      notFoundList.forEach(p => lines.push(`  • ${p.name} (${getCategoryMeta(p.category).label})`))
+    }
+    if (pendingList.length > 0) {
+      lines.push(``, `⏳ NOT CHECKED:`)
+      pendingList.forEach(p => lines.push(`  • ${p.name} (${getCategoryMeta(p.category).label})`))
+    }
+
+    setEmailStatus('sending')
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        { to_email: wifeEmail.trim(), subject: 'Grocery Shopping Report', message: lines.join('\n') },
+        EMAILJS_PUBLIC_KEY,
+      )
+      setEmailStatus('sent')
+    } catch (err) {
+      console.error('EmailJS error:', err)
+      setEmailStatus('error')
+    }
+  }
 
   const startShopping = () => {
     resetList()
@@ -265,6 +323,28 @@ export default function App() {
               <span className="lbl-pend">{pending} left</span>
               <span className="lbl-miss">✕ {notFound} not found</span>
             </div>
+          </div>
+        )}
+
+        {/* ── Send report (shopping mode only) ── */}
+        {mode === 'shopping' && (
+          <div className="email-section">
+            <input
+              type="email"
+              placeholder="Wife's email address…"
+              value={wifeEmail}
+              onChange={e => { setWifeEmail(e.target.value); setEmailStatus(null) }}
+              className="email-input"
+            />
+            <button
+              className="send-btn"
+              onClick={sendReport}
+              disabled={emailStatus === 'sending'}
+            >
+              {emailStatus === 'sending' ? 'Sending…' : '📧 Send Report'}
+            </button>
+            {emailStatus === 'sent'  && <span className="email-ok">✓ Report sent!</span>}
+            {emailStatus === 'error' && <span className="email-err">✕ Failed to send. Check your EmailJS config.</span>}
           </div>
         )}
 

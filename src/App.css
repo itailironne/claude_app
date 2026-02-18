@@ -346,3 +346,39 @@
   text-decoration: underline;
 }
 .clear-btn:hover { color: #ef4444; }
+
+/* ── Email report section ── */
+.email-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+.email-input {
+  flex: 1;
+  min-width: 180px;
+  padding: 0.45rem 0.75rem;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+}
+.email-input:focus { border-color: #6366f1; }
+.send-btn {
+  padding: 0.45rem 1rem;
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.send-btn:hover:not(:disabled) { background: #4f46e5; }
+.send-btn:disabled { opacity: 0.6; cursor: default; }
+.email-ok  { color: #16a34a; font-size: 0.85rem; font-weight: 600; }
+.email-err { color: #dc2626; font-size: 0.85rem; }
