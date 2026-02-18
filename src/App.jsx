@@ -219,6 +219,11 @@ export default function App() {
       pendingList.forEach(p => lines.push(`  • ${p.name} (${getCategoryMeta(p.category).label})`))
     }
 
+    lines.push(``, `──────────────────────`)
+    lines.push(`אהובתי, רציתי שתדעי שהשקעתי את כל הלב בקנייה הזו 💪`)
+    lines.push(`עברתי על כל המדפים, חיפשתי בכל הפינות, ועשיתי הכל כדי להביא הביתה את מה שביקשת.`)
+    lines.push(`אוהב אותך ❤️`)
+
     setEmailStatus('sending')
     try {
       await emailjs.send(
