@@ -188,7 +188,7 @@ export default function App() {
   const pending   = total - inBag - notFound
 
   const sendReport = async () => {
-    if (!wifeEmail.trim()) { alert('Please enter your wife\'s email address.'); return }
+    if (!wifeEmail.trim()) { alert('אנא הכנס את כתובת האימייל של אשתך.'); return }
     if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') { alert('Please configure your EmailJS credentials in App.jsx first.'); return }
 
     const date    = new Date().toLocaleString()
@@ -197,25 +197,25 @@ export default function App() {
     const pendingList  = products.filter(p => p.status === 'pending')
 
     const lines = [
-      `🛒 Grocery Shopping Report`,
-      `Date: ${date}`,
+      `🛒 דוח קניות`,
+      `תאריך: ${date}`,
       ``,
-      `Summary:`,
-      `✅ Found: ${inBagList.length} item${inBagList.length !== 1 ? 's' : ''}`,
-      `❌ Not found: ${notFoundList.length} item${notFoundList.length !== 1 ? 's' : ''}`,
-      `⏳ Not checked: ${pendingList.length} item${pendingList.length !== 1 ? 's' : ''}`,
+      `סיכום:`,
+      `✅ נמצא: ${inBagList.length} פריטים`,
+      `❌ לא נמצא: ${notFoundList.length} פריטים`,
+      `⏳ לא נבדק: ${pendingList.length} פריטים`,
     ]
 
     if (inBagList.length > 0) {
-      lines.push(``, `✅ IN BAG:`)
+      lines.push(``, `✅ בתיק:`)
       inBagList.forEach(p => lines.push(`  • ${p.name} (${getCategoryMeta(p.category).label})`))
     }
     if (notFoundList.length > 0) {
-      lines.push(``, `❌ NOT FOUND:`)
+      lines.push(``, `❌ לא נמצא:`)
       notFoundList.forEach(p => lines.push(`  • ${p.name} (${getCategoryMeta(p.category).label})`))
     }
     if (pendingList.length > 0) {
-      lines.push(``, `⏳ NOT CHECKED:`)
+      lines.push(``, `⏳ לא נבדק:`)
       pendingList.forEach(p => lines.push(`  • ${p.name} (${getCategoryMeta(p.category).label})`))
     }
 
@@ -224,7 +224,7 @@ export default function App() {
       await emailjs.send(
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
-        { to_email: wifeEmail.trim(), subject: 'Grocery Shopping Report', message: lines.join('\n') },
+        { to_email: wifeEmail.trim(), subject: 'דוח קניות', message: lines.join('\n') },
         EMAILJS_PUBLIC_KEY,
       )
       setEmailStatus('sent')
