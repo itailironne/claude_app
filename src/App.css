@@ -328,6 +328,32 @@
   50%       { opacity: 0.4; }
 }
 
+/* ── AI error ───────────────────────────────────────────── */
+.ai-error {
+  font-size: 0.82rem;
+  color: #ef4444;
+  margin: 6px 0 0;
+  text-align: center;
+}
+
+/* ── Inline edit input ──────────────────────────────────── */
+.inline-edit {
+  flex: 1;
+  font-size: 0.95rem;
+  padding: 0.15rem 0.4rem;
+  border: 2px solid #43cea2;
+  border-radius: 6px;
+  outline: none;
+  color: #1e293b;
+}
+
+.product-name[title] {
+  cursor: text;
+}
+.product-name[title]:hover {
+  color: #43cea2;
+}
+
 /* ── Empty state ────────────────────────────────────────── */
 .empty {
   text-align: center;

@@ -59,8 +59,11 @@ export default function App() {
   const [bulkMode, setBulkMode] = useState(false)
   const [bulkText, setBulkText] = useState('')
   const [categorizing, setCategorizing] = useState(false)
-  const [wifeEmail, setWifeEmail]       = useState('')
+  const [aiError, setAiError]           = useState(null)
+  const [wifeEmail, setWifeEmail]       = useState(() => localStorage.getItem('wife-email') || '')
   const [emailStatus, setEmailStatus]   = useState(null)
+  const [editingId, setEditingId]       = useState(null)
+  const [editingName, setEditingName]   = useState('')
 
   useEffect(() => {
     localStorage.setItem('grocery-list', JSON.stringify(products))
@@ -69,6 +72,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('grocery-categories', JSON.stringify(categories))
   }, [categories])
+
+  useEffect(() => {
+    localStorage.setItem('wife-email', wifeEmail)
+  }, [wifeEmail])
 
   const getCategoryMeta = (id) =>
     categories.find(c => c.id === id) || categories[categories.length - 1]
@@ -97,6 +104,7 @@ export default function App() {
     const trimmed = name.trim()
     if (!trimmed) return
     setCategorizing(true)
+    setAiError(null)
     try {
       const results = await categorizeWithLLM([trimmed], categories)
       const r = results[0]
@@ -109,6 +117,7 @@ export default function App() {
       setCategory(r.category_id)
     } catch (err) {
       console.error('LLM categorization failed:', err)
+      setAiError('AI categorization failed — item added to current category.')
       // Fallback: add with current selected category
       setProducts(prev => [
         ...prev,
@@ -127,6 +136,7 @@ export default function App() {
       .filter(l => l.length > 0)
     if (lines.length === 0) return
     setCategorizing(true)
+    setAiError(null)
     try {
       const results = await categorizeWithLLM(lines, categories)
       mergeNewCategories(results)
@@ -141,6 +151,7 @@ export default function App() {
       setBulkMode(false)
     } catch (err) {
       console.error('LLM bulk categorization failed:', err)
+      setAiError('AI categorization failed — items added to "Other".')
       // Fallback: add all as 'other'
       const newProducts = lines.map((line, i) => ({
         id: Date.now() + i,
@@ -157,6 +168,20 @@ export default function App() {
   }
 
   const deleteProduct = (id) => setProducts(products.filter(p => p.id !== id))
+
+  const startEditing = (product) => {
+    setEditingId(product.id)
+    setEditingName(product.name)
+  }
+
+  const commitEdit = () => {
+    const trimmed = editingName.trim()
+    if (trimmed) {
+      setProducts(prev => prev.map(p => p.id === editingId ? { ...p, name: trimmed } : p))
+    }
+    setEditingId(null)
+    setEditingName('')
+  }
 
   const resetList = () => setProducts(products.map(p => ({ ...p, status: 'pending' })))
 
@@ -320,6 +345,9 @@ export default function App() {
             {categorizing && (
               <p className="ai-label">🤖 AI is categorizing your product…</p>
             )}
+            {aiError && (
+              <p className="ai-error">⚠️ {aiError}</p>
+            )}
           </div>
         )}
 
@@ -380,9 +408,24 @@ export default function App() {
                   key={product.id}
                   className={`product-item status-${product.status}`}
                 >
-                  <span className="product-name">{product.name}</span>
+                  {mode === 'edit' && editingId === product.id ? (
+                    <input
+                      className="inline-edit"
+                      value={editingName}
+                      onChange={e => setEditingName(e.target.value)}
+                      onBlur={commitEdit}
+                      onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') setEditingId(null) }}
+                      autoFocus
+                    />
+                  ) : (
+                    <span
+                      className="product-name"
+                      onClick={() => mode === 'edit' && startEditing(product)}
+                      title={mode === 'edit' ? 'Click to edit' : undefined}
+                    >{product.name}</span>
+                  )}
 
-                  {mode === 'edit' && (
+                  {mode === 'edit' && editingId !== product.id && (
                     <button
                       className="delete-btn"
                       onClick={() => deleteProduct(product.id)}
