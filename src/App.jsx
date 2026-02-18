@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import emailjs from '@emailjs/browser'
 import './App.css'
 
@@ -21,13 +21,6 @@ const CATEGORIES = [
   { id: 'pantry',    label: 'Pantry',        emoji: '🥫' },
   { id: 'household', label: 'Household',     emoji: '🧴' },
   { id: 'other',     label: 'Other',         emoji: '📦' },
-]
-
-const INITIAL_PRODUCTS = [
-  { id: 1, name: 'Apples',       category: 'produce',   status: 'pending' },
-  { id: 2, name: 'Whole Milk',   category: 'dairy',     status: 'pending' },
-  { id: 3, name: 'Sourdough',    category: 'bakery',    status: 'pending' },
-  { id: 4, name: 'Chicken Breast', category: 'meat',   status: 'pending' },
 ]
 
 function getCategoryMeta(id) {
@@ -131,7 +124,14 @@ function detectCategory(productName) {
 }
 
 export default function App() {
-  const [products, setProducts] = useState(INITIAL_PRODUCTS)
+  const [products, setProducts] = useState(() => {
+    try {
+      const saved = localStorage.getItem('grocery-list')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
   const [mode, setMode]         = useState('edit')   // 'edit' | 'shopping'
   const [name, setName]         = useState('')
   const [category, setCategory] = useState('produce')
@@ -139,6 +139,10 @@ export default function App() {
   const [bulkText, setBulkText] = useState('')
   const [wifeEmail, setWifeEmail]   = useState('')
   const [emailStatus, setEmailStatus] = useState(null) // null | 'sending' | 'sent' | 'error'
+
+  useEffect(() => {
+    localStorage.setItem('grocery-list', JSON.stringify(products))
+  }, [products])
 
   // ── Edit mode actions ──────────────────────────────────────────
   const addProduct = () => {
