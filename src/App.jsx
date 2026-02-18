@@ -5,9 +5,9 @@ import './App.css'
 // ── EmailJS config ─────────────────────────────────────────────
 // Sign up free at https://www.emailjs.com, connect your email,
 // create a template, then paste your IDs here.
-const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY'   // Account > API Keys
-const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID'   // Email Services
-const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID'  // Email Templates
+const EMAILJS_PUBLIC_KEY  = 'jCTfKd70TfDuSFQ2F'   // Account > API Keys
+const EMAILJS_SERVICE_ID  = 'service_6c0wy79'     // Email Services
+const EMAILJS_TEMPLATE_ID = 'template_w1budbe'    // Email Templates
 // ──────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
