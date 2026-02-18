@@ -9,17 +9,17 @@ const EMAILJS_TEMPLATE_ID = 'template_cv9uvuk'
 // ──────────────────────────────────────────────────────────────
 
 const DEFAULT_CATEGORIES = [
-  { id: 'produce',   label: 'Produce',              emoji: '🥦' },
-  { id: 'dairy',     label: 'Dairy & Eggs',         emoji: '🥛' },
-  { id: 'meat',      label: 'Meat & Fish',          emoji: '🥩' },
-  { id: 'bakery',    label: 'Bakery',               emoji: '🍞' },
-  { id: 'frozen',    label: 'Frozen',               emoji: '🧊' },
-  { id: 'beverages', label: 'Beverages',            emoji: '🥤' },
-  { id: 'snacks',    label: 'Snacks',               emoji: '🍫' },
-  { id: 'pantry',    label: 'Pantry',               emoji: '🥫' },
-  { id: 'household', label: 'Household & Cleaning', emoji: '🧹' },
-  { id: 'personal',  label: 'Personal Care',        emoji: '🧴' },
-  { id: 'other',     label: 'Other',                emoji: '📦' },
+  { id: 'produce',   label: 'פירות וירקות',  emoji: '🥦' },
+  { id: 'dairy',     label: 'חלב וביצים',    emoji: '🥛' },
+  { id: 'meat',      label: 'בשר ודגים',     emoji: '🥩' },
+  { id: 'bakery',    label: 'מאפייה',         emoji: '🍞' },
+  { id: 'frozen',    label: 'קפוא',           emoji: '🧊' },
+  { id: 'beverages', label: 'משקאות',         emoji: '🥤' },
+  { id: 'snacks',    label: 'חטיפים',         emoji: '🍫' },
+  { id: 'pantry',    label: 'מזווה',          emoji: '🥫' },
+  { id: 'household', label: 'ניקיון ובית',   emoji: '🧹' },
+  { id: 'personal',  label: 'טיפוח אישי',    emoji: '🧴' },
+  { id: 'other',     label: 'אחר',            emoji: '📦' },
 ]
 
 async function categorizeWithLLM(productNames, currentCategories) {
@@ -47,7 +47,7 @@ export default function App() {
   })
   const [categories, setCategories] = useState(() => {
     try {
-      const saved = localStorage.getItem('grocery-categories')
+      const saved = localStorage.getItem('grocery-categories-v2')
       return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES
     } catch {
       return DEFAULT_CATEGORIES
@@ -70,7 +70,7 @@ export default function App() {
   }, [products])
 
   useEffect(() => {
-    localStorage.setItem('grocery-categories', JSON.stringify(categories))
+    localStorage.setItem('grocery-categories-v2', JSON.stringify(categories))
   }, [categories])
 
   useEffect(() => {

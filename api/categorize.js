@@ -27,7 +27,7 @@ Categorize the following grocery product(s): ${JSON.stringify(products)}
 Rules:
 1. Use an existing category if it fits well — prefer reusing existing categories.
 2. Create a NEW category only if the product truly does not fit any existing category.
-3. For new categories: provide a short label (2-3 words max), appropriate food/grocery emoji, and an id (lowercase, underscores, no spaces).
+3. For new categories: provide a short Hebrew label (2-3 words max), appropriate food/grocery emoji, and an id (lowercase, underscores, no spaces). The label MUST be in Hebrew.
 4. The response must be valid JSON — an array with one object per product, in the same order.
 
 Respond with ONLY a JSON array, no explanation:
