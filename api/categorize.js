@@ -8,9 +8,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing products array' })
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
+  const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
-    return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' })
+    return res.status(500).json({ error: 'GEMINI_API_KEY not configured' })
   }
 
   const categoryList = categories
@@ -34,28 +34,26 @@ Respond with ONLY a JSON array, no explanation:
 [{"name": "...", "category_id": "...", "category_label": "...", "category_emoji": "...", "is_new": false}]`
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1024,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    })
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.1, maxOutputTokens: 1024 },
+        }),
+      }
+    )
 
     const data = await response.json()
 
     if (!response.ok) {
-      console.error('Anthropic API error:', data)
-      return res.status(502).json({ error: 'Anthropic API error', details: data })
+      console.error('Gemini API error:', data)
+      return res.status(502).json({ error: 'Gemini API error', details: data })
     }
 
-    const text = data.content[0].text.trim()
+    const text = data.candidates[0].content.parts[0].text.trim()
     // Extract JSON array from response (in case there's any surrounding text)
     const jsonMatch = text.match(/\[[\s\S]*\]/)
     if (!jsonMatch) {
