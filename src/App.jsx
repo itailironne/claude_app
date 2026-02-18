@@ -1,95 +1,190 @@
 import { useState } from 'react'
 import './App.css'
 
-function App() {
-  const [todos, setTodos] = useState([
-    { id: 1, text: 'Buy groceries', completed: false },
-    { id: 2, text: 'Walk the dog', completed: true },
-  ])
-  const [input, setInput] = useState('')
-  const [filter, setFilter] = useState('all')
+const CATEGORIES = [
+  { id: 'produce',   label: 'Produce',       emoji: '🥦' },
+  { id: 'dairy',     label: 'Dairy & Eggs',  emoji: '🥛' },
+  { id: 'meat',      label: 'Meat & Fish',   emoji: '🥩' },
+  { id: 'bakery',    label: 'Bakery',        emoji: '🍞' },
+  { id: 'frozen',    label: 'Frozen',        emoji: '🧊' },
+  { id: 'beverages', label: 'Beverages',     emoji: '🥤' },
+  { id: 'snacks',    label: 'Snacks',        emoji: '🍫' },
+  { id: 'pantry',    label: 'Pantry',        emoji: '🥫' },
+  { id: 'household', label: 'Household',     emoji: '🧴' },
+  { id: 'other',     label: 'Other',         emoji: '📦' },
+]
 
-  const addTodo = () => {
-    const trimmed = input.trim()
+const INITIAL_PRODUCTS = [
+  { id: 1, name: 'Apples',       category: 'produce',   status: 'pending' },
+  { id: 2, name: 'Whole Milk',   category: 'dairy',     status: 'pending' },
+  { id: 3, name: 'Sourdough',    category: 'bakery',    status: 'pending' },
+  { id: 4, name: 'Chicken Breast', category: 'meat',   status: 'pending' },
+]
+
+function getCategoryMeta(id) {
+  return CATEGORIES.find(c => c.id === id) || CATEGORIES[CATEGORIES.length - 1]
+}
+
+export default function App() {
+  const [products, setProducts] = useState(INITIAL_PRODUCTS)
+  const [mode, setMode]         = useState('edit')   // 'edit' | 'shopping'
+  const [name, setName]         = useState('')
+  const [category, setCategory] = useState('produce')
+
+  // ── Edit mode actions ──────────────────────────────────────────
+  const addProduct = () => {
+    const trimmed = name.trim()
     if (!trimmed) return
-    setTodos([...todos, { id: Date.now(), text: trimmed, completed: false }])
-    setInput('')
+    setProducts([...products, { id: Date.now(), name: trimmed, category, status: 'pending' }])
+    setName('')
   }
 
-  const toggleTodo = (id) => {
-    setTodos(todos.map(t => t.id === id ? { ...t, completed: !t.completed } : t))
+  const deleteProduct = (id) => setProducts(products.filter(p => p.id !== id))
+
+  const resetList = () => setProducts(products.map(p => ({ ...p, status: 'pending' })))
+
+  // ── Shopping mode actions ──────────────────────────────────────
+  const setStatus = (id, status) =>
+    setProducts(products.map(p => p.id === id ? { ...p, status } : p))
+
+  // ── Group products by category, preserving CATEGORIES order ───
+  const grouped = CATEGORIES
+    .map(cat => ({
+      ...cat,
+      items: products.filter(p => p.category === cat.id),
+    }))
+    .filter(cat => cat.items.length > 0)
+
+  // ── Stats ──────────────────────────────────────────────────────
+  const total     = products.length
+  const inBag     = products.filter(p => p.status === 'in_bag').length
+  const notFound  = products.filter(p => p.status === 'not_found').length
+  const pending   = total - inBag - notFound
+
+  const startShopping = () => {
+    resetList()
+    setMode('shopping')
   }
-
-  const deleteTodo = (id) => {
-    setTodos(todos.filter(t => t.id !== id))
-  }
-
-  const clearCompleted = () => {
-    setTodos(todos.filter(t => !t.completed))
-  }
-
-  const filtered = todos.filter(t => {
-    if (filter === 'active') return !t.completed
-    if (filter === 'completed') return t.completed
-    return true
-  })
-
-  const remaining = todos.filter(t => !t.completed).length
 
   return (
     <div className="app">
       <div className="card">
-        <h1>Todo List</h1>
 
-        <div className="input-row">
-          <input
-            type="text"
-            placeholder="What needs to be done?"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && addTodo()}
-          />
-          <button className="add-btn" onClick={addTodo}>Add</button>
-        </div>
-
-        <div className="filters">
-          {['all', 'active', 'completed'].map(f => (
+        {/* ── Header ── */}
+        <div className="header">
+          <h1>🛒 Grocery List</h1>
+          {mode === 'edit' ? (
             <button
-              key={f}
-              className={filter === f ? 'active' : ''}
-              onClick={() => setFilter(f)}
+              className="mode-btn shop"
+              onClick={startShopping}
+              disabled={total === 0}
             >
-              {f.charAt(0).toUpperCase() + f.slice(1)}
+              Start Shopping
             </button>
-          ))}
-        </div>
-
-        <ul className="todo-list">
-          {filtered.length === 0 && (
-            <li className="empty">No tasks here!</li>
-          )}
-          {filtered.map(todo => (
-            <li key={todo.id} className={todo.completed ? 'done' : ''}>
-              <input
-                type="checkbox"
-                checked={todo.completed}
-                onChange={() => toggleTodo(todo.id)}
-              />
-              <span>{todo.text}</span>
-              <button className="delete-btn" onClick={() => deleteTodo(todo.id)}>✕</button>
-            </li>
-          ))}
-        </ul>
-
-        <div className="footer">
-          <span>{remaining} item{remaining !== 1 ? 's' : ''} left</span>
-          {todos.some(t => t.completed) && (
-            <button className="clear-btn" onClick={clearCompleted}>Clear completed</button>
+          ) : (
+            <button className="mode-btn edit" onClick={() => setMode('edit')}>
+              Edit List
+            </button>
           )}
         </div>
+
+        {/* ── Add form (edit mode only) ── */}
+        {mode === 'edit' && (
+          <div className="add-form">
+            <input
+              type="text"
+              placeholder="Product name…"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && addProduct()}
+            />
+            <select value={category} onChange={e => setCategory(e.target.value)}>
+              {CATEGORIES.map(c => (
+                <option key={c.id} value={c.id}>{c.emoji} {c.label}</option>
+              ))}
+            </select>
+            <button className="add-btn" onClick={addProduct}>Add</button>
+          </div>
+        )}
+
+        {/* ── Shopping progress bar ── */}
+        {mode === 'shopping' && total > 0 && (
+          <div className="progress-wrap">
+            <div className="progress-bar">
+              <div className="bar-bag"   style={{ width: `${(inBag    / total) * 100}%` }} />
+              <div className="bar-miss"  style={{ width: `${(notFound / total) * 100}%` }} />
+            </div>
+            <div className="progress-labels">
+              <span className="lbl-bag">✓ {inBag} in bag</span>
+              <span className="lbl-pend">{pending} left</span>
+              <span className="lbl-miss">✕ {notFound} not found</span>
+            </div>
+          </div>
+        )}
+
+        {/* ── Empty state ── */}
+        {total === 0 && (
+          <p className="empty">Your list is empty. Add some products above!</p>
+        )}
+
+        {/* ── Grouped product list ── */}
+        {grouped.map(cat => (
+          <div key={cat.id} className="category-group">
+            <div className="category-header">
+              <span className="cat-emoji">{cat.emoji}</span>
+              <span className="cat-label">{cat.label}</span>
+              <span className="cat-count">{cat.items.length}</span>
+            </div>
+
+            <ul className="product-list">
+              {cat.items.map(product => (
+                <li
+                  key={product.id}
+                  className={`product-item status-${product.status}`}
+                >
+                  <span className="product-name">{product.name}</span>
+
+                  {mode === 'edit' && (
+                    <button
+                      className="delete-btn"
+                      onClick={() => deleteProduct(product.id)}
+                      title="Remove"
+                    >✕</button>
+                  )}
+
+                  {mode === 'shopping' && (
+                    <div className="action-btns">
+                      <button
+                        className={`bag-btn ${product.status === 'in_bag' ? 'active' : ''}`}
+                        onClick={() => setStatus(product.id, product.status === 'in_bag' ? 'pending' : 'in_bag')}
+                        title="In bag"
+                      >✓</button>
+                      <button
+                        className={`miss-btn ${product.status === 'not_found' ? 'active' : ''}`}
+                        onClick={() => setStatus(product.id, product.status === 'not_found' ? 'pending' : 'not_found')}
+                        title="Not found"
+                      >✕</button>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+
+        {/* ── Footer ── */}
+        {total > 0 && (
+          <div className="footer">
+            <span>{total} product{total !== 1 ? 's' : ''} on the list</span>
+            {mode === 'edit' && (
+              <button className="clear-btn" onClick={() => setProducts([])}>
+                Clear all
+              </button>
+            )}
+          </div>
+        )}
+
       </div>
     </div>
   )
 }
-
-export default App
