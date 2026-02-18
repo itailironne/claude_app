@@ -25,6 +25,102 @@ function getCategoryMeta(id) {
   return CATEGORIES.find(c => c.id === id) || CATEGORIES[CATEGORIES.length - 1]
 }
 
+const CATEGORY_KEYWORDS = {
+  produce: [
+    'apple','apples','banana','bananas','tomato','tomatoes','lettuce','carrot','carrots',
+    'onion','onions','potato','potatoes','cucumber','cucumbers','pepper','peppers','spinach',
+    'broccoli','zucchini','eggplant','celery','garlic','ginger','lemon','lemons','lime','limes',
+    'orange','oranges','grape','grapes','strawberry','strawberries','blueberry','blueberries',
+    'mango','watermelon','melon','pear','pears','peach','peaches','plum','plums',
+    'cherry','cherries','avocado','avocados','corn','mushroom','mushrooms','cabbage',
+    'cauliflower','kale','arugula','cilantro','parsley','mint','basil','fruit','vegetable',
+    'vegetables','salad','fresh',
+    // Hebrew
+    'תפוח','תפוחים','בננה','בננות','עגבניה','עגבניות','חסה','גזר','גזרים',
+    'בצל','בצלים','תפוח אדמה','תפוחי אדמה','מלפפון','מלפפונים','פלפל','פלפלים',
+    'תרד','ברוקולי','קישוא','קישואים','חצילים','חציל','סלרי','שום','לימון','לימונים',
+    'תפוז','תפוזים','ענבים','ענב','תות','תותים','אוכמניות','מנגו','אבטיח','מלון',
+    'אגס','אגסים','אפרסק','שזיף','שזיפים','דובדבן','דובדבנים','אבוקדו','תירס',
+    'פטריות','פטריה','כרוב','כרובית','קייל','כוסברה','פטרוזיליה','נענע','בזיליקום',
+    'פרי','פירות','ירק','ירקות','סלט','טרי','טריים',
+  ],
+  dairy: [
+    'milk','cheese','yogurt','butter','cream','egg','eggs','cottage','mozzarella','cheddar',
+    'parmesan','feta','brie','gouda','ricotta','kefir','dairy',
+    // Hebrew
+    'חלב','גבינה','גבינות','יוגורט','חמאה','שמנת','ביצה','ביצים','קוטג','שמנת חמוצה',
+    'מוצרלה','פרמזן','פטה','גאודה','ריקוטה','קצפת','קפיר','מוצרי חלב','לבן',
+  ],
+  meat: [
+    'chicken','beef','pork','fish','salmon','tuna','shrimp','turkey','lamb','veal',
+    'steak','sausage','bacon','ham','duck','cod','tilapia','sardine','sardines',
+    'anchovy','anchovies','crab','lobster','meat','minced',
+    // Hebrew
+    'עוף','חזה עוף','כנפיים','שוקיים','בקר','חזיר','דג','דגים','סלמון','טונה',
+    'שרימפס','הודו','כבש','עגל','סטייק','טחון','נקניק','בייקון','ברווז','בשר',
+  ],
+  bakery: [
+    'bread','roll','rolls','bun','buns','bagel','bagels','croissant','muffin','muffins',
+    'cake','pastry','pastries','cookie','cookies','pita','tortilla','sourdough','rye',
+    'baguette','ciabatta','focaccia','pretzel','pretzels','donut','donuts',
+    // Hebrew
+    'לחם','לחמניה','לחמניות','כיכר','בגל','קרואסון','מאפין','עוגה','עוגות',
+    'מאפה','מאפים','עוגייה','עוגיות','פיתה','פיתות','טורטייה','שיפון','באגט',
+    'פרצל','סופגניה','סופגניות',
+  ],
+  frozen: [
+    'frozen','ice cream','popsicle','gelato','sorbet',
+    // Hebrew
+    'קפוא','קפואים','גלידה','ארטיק','סורבה',
+  ],
+  beverages: [
+    'juice','water','soda','cola','coffee','tea','beer','wine','smoothie',
+    'lemonade','sparkling','drink','beverage',
+    // Hebrew
+    'מיץ','מים','סודה','קולה','קפה','תה','בירה','יין','סמוזי',
+    'לימונדה','מים מוגזים','מים מינרלים','משקה','שתייה',
+  ],
+  snacks: [
+    'chips','chocolate','candy','nuts','popcorn','crackers','granola','snack',
+    'gummy','gummies','trail mix','dried fruit',
+    // Hebrew
+    'שוקולד','ממתק','ממתקים','אגוזים','פופקורן','קרקר','קרקרים',
+    'גרנולה','חטיף','חטיפים','גומי','פירות יבשים',
+  ],
+  pantry: [
+    'pasta','rice','flour','sugar','salt','oil','vinegar','sauce','ketchup','mustard',
+    'mayonnaise','canned','beans','lentils','chickpeas','cereal','oats','honey','jam',
+    'peanut butter','tahini','hummus','spice','spices','cumin','paprika','oregano',
+    'olive oil',
+    // Hebrew
+    'פסטה','אורז','קמח','סוכר','מלח','שמן','חומץ','רוטב','קטשופ','חרדל',
+    'מיונז','שימורים','שעועית','עדשים','קורנפלקס','שיבולת שועל','דבש','ריבה',
+    'חמאת בוטנים','טחינה','תבלין','תבלינים','כמון','פפריקה','אורגנו','שמן זית',
+  ],
+  household: [
+    'soap','shampoo','conditioner','toothpaste','toothbrush','toilet paper','paper towel',
+    'detergent','bleach','sponge','trash bag','dish soap','deodorant','razor','lotion',
+    'sunscreen','medicine','vitamin',
+    // Hebrew
+    'סבון','שמפו','מרכך','משחת שיניים','מברשת שיניים','נייר טואלט','מגבת נייר',
+    'אבקת כביסה','אקונומיקה','ספוג','שקית אשפה','נייר כסף','נוזל כלים',
+    'מרכך בד','דאודורנט','קרם','קרם הגנה','תרופה','ויטמין',
+  ],
+}
+
+function detectCategory(productName) {
+  const lower = productName.toLowerCase().trim()
+  if (!lower) return null
+  for (const [catId, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    for (const keyword of keywords) {
+      if (lower.includes(keyword.toLowerCase())) {
+        return catId
+      }
+    }
+  }
+  return null
+}
+
 export default function App() {
   const [products, setProducts] = useState(INITIAL_PRODUCTS)
   const [mode, setMode]         = useState('edit')   // 'edit' | 'shopping'
@@ -95,7 +191,11 @@ export default function App() {
               type="text"
               placeholder="Product name…"
               value={name}
-              onChange={e => setName(e.target.value)}
+              onChange={e => {
+                setName(e.target.value)
+                const detected = detectCategory(e.target.value)
+                if (detected) setCategory(detected)
+              }}
               onKeyDown={e => e.key === 'Enter' && addProduct()}
             />
             <select value={category} onChange={e => setCategory(e.target.value)}>
