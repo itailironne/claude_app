@@ -315,6 +315,19 @@
   color: #fff;
 }
 
+/* ── AI categorizing label ──────────────────────────────── */
+.ai-label {
+  font-size: 0.82rem;
+  color: #6366f1;
+  margin: 6px 0 0;
+  text-align: center;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
 /* ── Empty state ────────────────────────────────────────── */
 .empty {
   text-align: center;
