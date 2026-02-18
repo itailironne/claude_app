@@ -126,6 +126,8 @@ export default function App() {
   const [mode, setMode]         = useState('edit')   // 'edit' | 'shopping'
   const [name, setName]         = useState('')
   const [category, setCategory] = useState('produce')
+  const [bulkMode, setBulkMode] = useState(false)
+  const [bulkText, setBulkText] = useState('')
 
   // ── Edit mode actions ──────────────────────────────────────────
   const addProduct = () => {
@@ -133,6 +135,23 @@ export default function App() {
     if (!trimmed) return
     setProducts([...products, { id: Date.now(), name: trimmed, category, status: 'pending' }])
     setName('')
+  }
+
+  const addBulk = () => {
+    const lines = bulkText
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => l.length > 0)
+    if (lines.length === 0) return
+    const newProducts = lines.map((line, i) => ({
+      id: Date.now() + i,
+      name: line,
+      category: detectCategory(line) || 'other',
+      status: 'pending',
+    }))
+    setProducts([...products, ...newProducts])
+    setBulkText('')
+    setBulkMode(false)
   }
 
   const deleteProduct = (id) => setProducts(products.filter(p => p.id !== id))
@@ -186,24 +205,51 @@ export default function App() {
 
         {/* ── Add form (edit mode only) ── */}
         {mode === 'edit' && (
-          <div className="add-form">
-            <input
-              type="text"
-              placeholder="Product name…"
-              value={name}
-              onChange={e => {
-                setName(e.target.value)
-                const detected = detectCategory(e.target.value)
-                if (detected) setCategory(detected)
-              }}
-              onKeyDown={e => e.key === 'Enter' && addProduct()}
-            />
-            <select value={category} onChange={e => setCategory(e.target.value)}>
-              {CATEGORIES.map(c => (
-                <option key={c.id} value={c.id}>{c.emoji} {c.label}</option>
-              ))}
-            </select>
-            <button className="add-btn" onClick={addProduct}>Add</button>
+          <div className="add-section">
+            <div className="add-toggle">
+              <button
+                className={`toggle-btn ${!bulkMode ? 'active' : ''}`}
+                onClick={() => setBulkMode(false)}
+              >+ One item</button>
+              <button
+                className={`toggle-btn ${bulkMode ? 'active' : ''}`}
+                onClick={() => setBulkMode(true)}
+              >≡ Paste list</button>
+            </div>
+
+            {!bulkMode ? (
+              <div className="add-form">
+                <input
+                  type="text"
+                  placeholder="Product name…"
+                  value={name}
+                  onChange={e => {
+                    setName(e.target.value)
+                    const detected = detectCategory(e.target.value)
+                    if (detected) setCategory(detected)
+                  }}
+                  onKeyDown={e => e.key === 'Enter' && addProduct()}
+                />
+                <select value={category} onChange={e => setCategory(e.target.value)}>
+                  {CATEGORIES.map(c => (
+                    <option key={c.id} value={c.id}>{c.emoji} {c.label}</option>
+                  ))}
+                </select>
+                <button className="add-btn" onClick={addProduct}>Add</button>
+              </div>
+            ) : (
+              <div className="bulk-form">
+                <textarea
+                  placeholder={"One product per line, e.g.:\nמלפפון\nחלב\nלחם\nchicken\nolive oil"}
+                  value={bulkText}
+                  onChange={e => setBulkText(e.target.value)}
+                  rows={5}
+                />
+                <button className="add-btn bulk-add-btn" onClick={addBulk}>
+                  Add All
+                </button>
+              </div>
+            )}
           </div>
         )}
 

@@ -59,6 +59,61 @@
 }
 .mode-btn.edit:hover { opacity: 0.85; }
 
+/* ── Add section (toggle + forms) ──────────────────────── */
+.add-section {
+  margin-bottom: 1.25rem;
+}
+
+.add-toggle {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+
+.toggle-btn {
+  padding: 0.35rem 0.9rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 999px;
+  background: #fff;
+  color: #94a3b8;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.toggle-btn.active {
+  border-color: #43cea2;
+  color: #43cea2;
+  background: #f0fefb;
+}
+
+.bulk-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bulk-form textarea {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: #333;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  line-height: 1.6;
+}
+.bulk-form textarea:focus { border-color: #43cea2; }
+
+.bulk-add-btn {
+  align-self: flex-end;
+  padding: 0.6rem 1.4rem;
+}
+
 /* ── Add form ───────────────────────────────────────────── */
 .add-form {
   display: flex;
