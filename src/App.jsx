@@ -11,20 +11,32 @@ const EMAILJS_TEMPLATE_ID = 'template_cv9uvuk'    // Email Templates
 // ──────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
-  { id: 'produce',   label: 'Produce',       emoji: '🥦' },
-  { id: 'dairy',     label: 'Dairy & Eggs',  emoji: '🥛' },
-  { id: 'meat',      label: 'Meat & Fish',   emoji: '🥩' },
-  { id: 'bakery',    label: 'Bakery',        emoji: '🍞' },
-  { id: 'frozen',    label: 'Frozen',        emoji: '🧊' },
-  { id: 'beverages', label: 'Beverages',     emoji: '🥤' },
-  { id: 'snacks',    label: 'Snacks',        emoji: '🍫' },
-  { id: 'pantry',    label: 'Pantry',        emoji: '🥫' },
-  { id: 'household', label: 'Household',     emoji: '🧴' },
-  { id: 'other',     label: 'Other',         emoji: '📦' },
+  { id: 'produce',   label: 'Produce',              emoji: '🥦' },
+  { id: 'dairy',     label: 'Dairy & Eggs',         emoji: '🥛' },
+  { id: 'meat',      label: 'Meat & Fish',          emoji: '🥩' },
+  { id: 'bakery',    label: 'Bakery',               emoji: '🍞' },
+  { id: 'frozen',    label: 'Frozen',               emoji: '🧊' },
+  { id: 'beverages', label: 'Beverages',            emoji: '🥤' },
+  { id: 'snacks',    label: 'Snacks',               emoji: '🍫' },
+  { id: 'pantry',    label: 'Pantry',               emoji: '🥫' },
+  { id: 'household', label: 'Household & Cleaning', emoji: '🧹' },
+  { id: 'personal',  label: 'Personal Care',        emoji: '🧴' },
+  { id: 'other',     label: 'Other',                emoji: '📦' },
 ]
 
 function getCategoryMeta(id) {
   return CATEGORIES.find(c => c.id === id) || CATEGORIES[CATEGORIES.length - 1]
+}
+
+// Returns true only when `keyword` appears as a whole word inside `text`
+function matchesKeyword(text, keyword) {
+  const kw = keyword.toLowerCase()
+  const idx = text.indexOf(kw)
+  if (idx === -1) return false
+  const isWordChar = c => /[a-z0-9\u0590-\u05FF]/.test(c)
+  const before = idx > 0 ? text[idx - 1] : ''
+  const after = idx + kw.length < text.length ? text[idx + kw.length] : ''
+  return (!before || !isWordChar(before)) && (!after || !isWordChar(after))
 }
 
 const CATEGORY_KEYWORDS = {
@@ -36,7 +48,10 @@ const CATEGORY_KEYWORDS = {
     'mango','watermelon','melon','pear','pears','peach','peaches','plum','plums',
     'cherry','cherries','avocado','avocados','corn','mushroom','mushrooms','cabbage',
     'cauliflower','kale','arugula','cilantro','parsley','mint','basil','fruit','vegetable',
-    'vegetables','salad','fresh',
+    'vegetables','salad','fresh','thyme','rosemary','dill','sage','chives','beet','beets',
+    'leek','leeks','radish','radishes','asparagus','pineapple','pomegranate','fig','figs',
+    'apricot','apricots','nectarine','herbs','fennel','artichoke','scallion','scallions',
+    'turnip','kohlrabi',
     // Hebrew
     'תפוח','תפוחים','בננה','בננות','עגבניה','עגבניות','חסה','גזר','גזרים',
     'בצל','בצלים','תפוח אדמה','תפוחי אדמה','מלפפון','מלפפונים','פלפל','פלפלים',
@@ -44,22 +59,28 @@ const CATEGORY_KEYWORDS = {
     'תפוז','תפוזים','ענבים','ענב','תות','תותים','אוכמניות','מנגו','אבטיח','מלון',
     'אגס','אגסים','אפרסק','שזיף','שזיפים','דובדבן','דובדבנים','אבוקדו','תירס',
     'פטריות','פטריה','כרוב','כרובית','קייל','כוסברה','פטרוזיליה','נענע','בזיליקום',
-    'פרי','פירות','ירק','ירקות','סלט','טרי','טריים',
+    'פרי','פירות','ירק','ירקות','סלט','טרי','טריים','תימין','רוזמרין','שמיר',
+    'סלק','כרישה','כרישות','צנון','אספרגוס','אננס','רימון','תאנה','תאנים',
+    'משמש','נקטרינה','שומר','ארטישוק','קולורבי',
   ],
   dairy: [
-    'milk','cheese','yogurt','butter','cream','egg','eggs','cottage','mozzarella','cheddar',
-    'parmesan','feta','brie','gouda','ricotta','kefir','dairy',
+    'milk','cheese','yogurt','butter','sour cream','cream cheese','whipped cream',
+    'egg','eggs','cottage','mozzarella','cheddar','parmesan','feta','brie','gouda',
+    'ricotta','kefir','dairy','oat milk','almond milk','soy milk',
     // Hebrew
-    'חלב','גבינה','גבינות','יוגורט','חמאה','שמנת','ביצה','ביצים','קוטג','שמנת חמוצה',
-    'מוצרלה','פרמזן','פטה','גאודה','ריקוטה','קצפת','קפיר','מוצרי חלב','לבן',
+    'חלב','גבינה','גבינות','יוגורט','חמאה','שמנת','שמנת חמוצה','ביצה','ביצים',
+    'קוטג','מוצרלה','פרמזן','פטה','גאודה','ריקוטה','קצפת','קפיר','מוצרי חלב','לבן',
+    'חלב שקדים','חלב שיבולת שועל','חלב סויה',
   ],
   meat: [
     'chicken','beef','pork','fish','salmon','tuna','shrimp','turkey','lamb','veal',
     'steak','sausage','bacon','ham','duck','cod','tilapia','sardine','sardines',
-    'anchovy','anchovies','crab','lobster','meat','minced',
+    'anchovy','anchovies','crab','lobster','meat','minced','ground beef','ground chicken',
+    'liver','schnitzel','fillet','pastrami','deli',
     // Hebrew
     'עוף','חזה עוף','כנפיים','שוקיים','בקר','חזיר','דג','דגים','סלמון','טונה',
     'שרימפס','הודו','כבש','עגל','סטייק','טחון','נקניק','בייקון','ברווז','בשר',
+    'כבד','שניצל','פילה','פסטרמה','קציצות',
   ],
   bakery: [
     'bread','roll','rolls','bun','buns','bagel','bagels','croissant','muffin','muffins',
@@ -71,56 +92,78 @@ const CATEGORY_KEYWORDS = {
     'פרצל','סופגניה','סופגניות',
   ],
   frozen: [
-    'frozen','ice cream','popsicle','gelato','sorbet',
+    'frozen','ice cream','popsicle','gelato','sorbet','french fries','frozen pizza',
+    'fish sticks','fish fingers','nuggets','waffles',
     // Hebrew
-    'קפוא','קפואים','גלידה','ארטיק','סורבה',
+    'קפוא','קפואים','גלידה','ארטיק','סורבה','צ\'יפס','פיצה קפואה','נאגטס',
+    'אצבעות דג','וופל',
   ],
   beverages: [
     'juice','water','soda','cola','coffee','tea','beer','wine','smoothie',
-    'lemonade','sparkling','drink','beverage',
+    'lemonade','sparkling','drink','beverage','energy drink','sports drink',
     // Hebrew
     'מיץ','מים','סודה','קולה','קפה','תה','בירה','יין','סמוזי',
-    'לימונדה','מים מוגזים','מים מינרלים','משקה','שתייה',
+    'לימונדה','מים מוגזים','מים מינרלים','משקה','שתייה','נס קפה',
   ],
   snacks: [
     'chips','chocolate','candy','nuts','popcorn','crackers','granola','snack',
-    'gummy','gummies','trail mix','dried fruit',
+    'gummy','gummies','trail mix','dried fruit','peanuts','almonds','cashews',
+    'walnuts','pistachios','pretzels','rice cakes','energy bar','granola bar',
     // Hebrew
     'שוקולד','ממתק','ממתקים','אגוזים','פופקורן','קרקר','קרקרים',
-    'גרנולה','חטיף','חטיפים','גומי','פירות יבשים',
+    'גרנולה','חטיף','חטיפים','גומי','פירות יבשים','בוטנים','שקדים',
+    'קשיו','אגוזי מלך','פיסטוקים','ביסלי','במבה','אחלה',
   ],
   pantry: [
     'pasta','rice','flour','sugar','salt','oil','vinegar','sauce','ketchup','mustard',
     'mayonnaise','canned','beans','lentils','chickpeas','cereal','oats','honey','jam',
     'peanut butter','tahini','hummus','spice','spices','cumin','paprika','oregano',
-    'olive oil',
+    'olive oil','cornflakes','cornstarch','quinoa','couscous','bulgur','barley',
+    'cocoa','syrup','maple syrup','breadcrumbs','baking soda','baking powder','yeast',
+    'noodles','soup','broth','stock','nutella','tomato paste',
     // Hebrew
     'פסטה','אורז','קמח','סוכר','מלח','שמן','חומץ','רוטב','קטשופ','חרדל',
     'מיונז','שימורים','שעועית','עדשים','קורנפלקס','שיבולת שועל','דבש','ריבה',
     'חמאת בוטנים','טחינה','תבלין','תבלינים','כמון','פפריקה','אורגנו','שמן זית',
+    'קינואה','קוסקוס','בורגול','שעורה','קקאו','סירופ','פירורי לחם','סודה לשתייה',
+    'אבקת אפייה','שמרים','אטריות','מרק אבקה','נוטלה','רסק עגבניות',
   ],
   household: [
-    'soap','shampoo','conditioner','toothpaste','toothbrush','toilet paper','paper towel',
-    'detergent','bleach','sponge','trash bag','dish soap','deodorant','razor','lotion',
-    'sunscreen','medicine','vitamin',
+    'toilet paper','paper towel','paper towels','detergent','bleach','sponge','trash bag',
+    'dish soap','aluminum foil','plastic wrap','fabric softener','cleaning','laundry',
+    'mop','broom','dustpan','disinfectant','garbage bag','foil',
     // Hebrew
-    'סבון','שמפו','מרכך','משחת שיניים','מברשת שיניים','נייר טואלט','מגבת נייר',
-    'אבקת כביסה','אקונומיקה','ספוג','שקית אשפה','נייר כסף','נוזל כלים',
-    'מרכך בד','דאודורנט','קרם','קרם הגנה','תרופה','ויטמין',
+    'נייר טואלט','מגבת נייר','אבקת כביסה','אקונומיקה','ספוג','שקית אשפה',
+    'נייר כסף','ניילון נצמד','נוזל כלים','מרכך בד','נייר אפייה','ניקיון',
+    'חומר ניקוי','מטאטא',
+  ],
+  personal: [
+    'soap','shampoo','conditioner','toothpaste','toothbrush','deodorant','razor',
+    'lotion','sunscreen','medicine','vitamin','moisturizer','face wash','body wash',
+    'cotton','bandage','band-aid','perfume','cologne','makeup','lipstick','mascara',
+    'nail polish','hair gel','hair spray','floss','mouthwash',
+    // Hebrew
+    'סבון','שמפו','מרכך','משחת שיניים','מברשת שיניים','דאודורנט',
+    'קרם','קרם הגנה','תרופה','ויטמין','ניקוי פנים','כותנה','פלסטר',
+    'בושם','מייקאפ','לק','ג\'ל שיער','חוט דנטלי','שטיפת פה',
   ],
 }
 
 function detectCategory(productName) {
   const lower = productName.toLowerCase().trim()
   if (!lower) return null
+  // Pick the category whose longest keyword matches (avoids "corn" stealing "popcorn"/"cornflakes")
+  let bestCat = null
+  let bestLen = 0
   for (const [catId, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
     for (const keyword of keywords) {
-      if (lower.includes(keyword.toLowerCase())) {
-        return catId
+      if (keyword.length > bestLen && matchesKeyword(lower, keyword.toLowerCase())) {
+        bestCat = catId
+        bestLen = keyword.length
       }
     }
   }
-  return null
+  return bestCat
 }
 
 export default function App() {
